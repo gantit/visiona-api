@@ -23,7 +23,7 @@ const auth = passport.authenticate('jwt', { session: false });
 
 // /api/user
 router.post('/', limiter, userCreate);
-router.get('/login', limiter, userLogin);
+router.post('/login', limiter, userLogin);
 router.get('/profile', auth, limiter, (req, res) => { res.json({ message: 'Hello World!' }); });
 
 // /api/user/:id
