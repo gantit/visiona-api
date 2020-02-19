@@ -1,6 +1,9 @@
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 import User from '../models/user';
+
+const { API_KEY } = process.env;
 
 const validateUsername = async (username) => {
   const user = await User.findOne({ username });
@@ -17,7 +20,14 @@ const userCreate = async (req, res, next) => {
     email,
     password,
     role,
+    key,
   } = req.body;
+  if (key !== API_KEY) {
+    return res.status(401).json({
+      message: 'You don\'t have acces to create user\'s',
+      success: true,
+    });
+  }
   try {
     const usernameNotTaken = await validateUsername(username);
     if (!usernameNotTaken) {
@@ -56,7 +66,64 @@ const userCreate = async (req, res, next) => {
   return null;
 };
 
-export default userCreate;
+const userLogin = async (req, res, next) => {
+  const {
+    email,
+    password,
+  } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        message: 'Username is not found. Invalid login credentials',
+        success: false,
+        u: 'u',
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(404).json({
+        message: 'Username is not found. Invalid login credentials',
+        success: false,
+        p: 'p',
+      });
+    }
+
+    if (isMatch) {
+      const token = jwt.sign(
+        {
+          // eslint-disable-next-line no-underscore-dangle
+          user_id: user._id,
+          role: user.role,
+          username: user.username,
+          email: user.email,
+        },
+        API_KEY,
+        { expiresIn: '7 days' },
+      );
+
+      const result = {
+        username: user.username,
+        role: user.role,
+        email: user.email,
+        token: `Bearer ${token}`,
+        expiresIn: 168,
+      };
+
+      return res.status(200).json({
+        ...result,
+        message: 'Hurray! You are now logged in.',
+        success: true,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+  return null;
+};
+
 export {
   userCreate,
+  userLogin,
 };
