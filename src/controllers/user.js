@@ -77,7 +77,6 @@ const userLogin = async (req, res, next) => {
       return res.status(404).json({
         message: 'Username is not found. Invalid login credentials',
         success: false,
-        u: 'u',
       });
     }
 
@@ -86,7 +85,6 @@ const userLogin = async (req, res, next) => {
       return res.status(404).json({
         message: 'Username is not found. Invalid login credentials',
         success: false,
-        p: 'p',
       });
     }
 
@@ -110,7 +108,6 @@ const userLogin = async (req, res, next) => {
         token: `Bearer ${token}`,
         expiresIn: 168,
       };
-
       return res.status(200).json({
         ...result,
         message: 'Hurray! You are now logged in.',

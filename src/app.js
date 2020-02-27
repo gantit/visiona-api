@@ -9,6 +9,7 @@ import dbConnect from './database/user';
 // import Routes
 import userRouter from './routes/user';
 import contactRouter from './routes/contact';
+import productsRouter from './routes/products';
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(passport.initialize());
 app.get('/', (req, res) => { res.json({ message: 'Hello World!' }); });
 app.use('/api/user', dbConnect, userRouter);
 app.use('/api/contacts', dbConnect, contactRouter);
+app.use('/api/products', dbConnect, productsRouter);
 
 app.use(notFound);
 app.use(errorHandler);
